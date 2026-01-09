@@ -18,17 +18,17 @@ export class GeminiService {
 
   async analyzeRepo(files: FileContent[]): Promise<RepoAnalysis> {
     const context = this.constructCodeContext(files);
-    const prompt = `You are a technical mentor for "vibe coders" who want to understand code deeply but simply. 
-    Analyze this repository and explain it as if you are talking to a curious developer. 
-    Avoid heavy jargon where possible, or explain it if used.
+    const prompt = `You are a technical mentor for developers who want to understand code deeply but simply. 
+    Analyze this repository and explain it as a narrative guide.
     
     Structure your response into:
-    1. The Mission: What is this project's core purpose?
-    2. The Blueprint: How is it built at a high level? (Simple English)
-    3. Technical Decisions: Identify 3-5 key choices (libs, patterns) and explain WHY they were likely chosen.
-    4. The Anatomy: Explain the folder/file organization logic. Why is it structured this way?
-    5. The Tech Stack: List the main tools used.
-    6. Curiosity Points: 5 questions to help them dive deeper into the code.
+    1. The Mission: The project's "why" and core purpose.
+    2. The Blueprint: High-level system design in plain English.
+    3. Technical Decisions: 3-5 key choices (patterns/libs) and their rationale.
+    4. The File Map: Identify 6-8 most important files/folders and explain exactly what role each plays in the system.
+    5. The Anatomy Logic: Why is the folder structure organized this way? (e.g., modular vs layered).
+    6. The Tech Stack: Main tools used.
+    7. Curiosity Points: 5 questions to help them dive deeper.
 
     Repository Context:
     ${context}`;
@@ -54,11 +54,22 @@ export class GeminiService {
                 required: ["decision", "rationale"]
               }
             },
-            fileOrganization: { type: Type.STRING },
+            importantFiles: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  path: { type: Type.STRING },
+                  role: { type: Type.STRING }
+                },
+                required: ["path", "role"]
+              }
+            },
+            fileOrganizationLogic: { type: Type.STRING },
             techStack: { type: Type.ARRAY, items: { type: Type.STRING } },
             suggestedQuestions: { type: Type.ARRAY, items: { type: Type.STRING } }
           },
-          required: ["mission", "architectureSimple", "technicalDecisions", "fileOrganization", "techStack", "suggestedQuestions"]
+          required: ["mission", "architectureSimple", "technicalDecisions", "importantFiles", "fileOrganizationLogic", "techStack", "suggestedQuestions"]
         }
       }
     });
@@ -71,16 +82,12 @@ export class GeminiService {
     this.chatInstance = this.ai.chats.create({
       model: MODEL_NAME,
       config: {
-        systemInstruction: `You are an expert mentor for this codebase. 
-        Your goal is to help a "vibe coder" understand the "how" and "why" of this specific repo.
-        Always refer to specific files and folder structures in your explanations.
-        Use simple, clear language but don't shy away from explaining the underlying engineering principles.
+        systemInstruction: `You are a mentor helping a developer understand this codebase. 
+        Refer to specific files like ${initialAnalysis.importantFiles.map(f => f.path).join(', ')} when explaining.
+        Focus on the "why" behind the code, not just the "what".
         
-        CONTEXT FOR ANALYSIS:
-        ${JSON.stringify(initialAnalysis, null, 2)}
-        
-        FULL CODE CONTEXT:
-        ${context}`,
+        ANALYSIS: ${JSON.stringify(initialAnalysis)}
+        CODE: ${context}`,
       }
     });
   }

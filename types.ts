@@ -11,6 +11,11 @@ export interface FileContent {
   size: number;
 }
 
+export interface ImportantFile {
+  path: string;
+  role: string;
+}
+
 export interface RepoAnalysis {
   mission: string;
   architectureSimple: string;
@@ -18,7 +23,8 @@ export interface RepoAnalysis {
     decision: string;
     rationale: string;
   }[];
-  fileOrganization: string;
+  importantFiles: ImportantFile[];
+  fileOrganizationLogic: string;
   techStack: string[];
   suggestedQuestions: string[];
 }
