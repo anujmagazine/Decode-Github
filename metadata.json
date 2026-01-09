@@ -1,0 +1,5 @@
+{
+  "name": "Decode Github: Deep Repo Insight",
+  "description": "An AI-powered repository explorer that scans public GitHub repositories to provide deep architectural insights, code explanations, and a conversational interface for developers to truly understand how a codebase works.",
+  "requestFramePermissions": []
+}
