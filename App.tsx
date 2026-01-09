@@ -69,41 +69,41 @@ const App: React.FC = () => {
       case AppState.IDLE:
       case AppState.ERROR:
         return (
-          <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 text-center">
-            <div className="mb-12 p-8 bg-indigo-600/5 rounded-[2.5rem] border border-indigo-600/10 shadow-2xl">
-              <BookText size={80} className="text-indigo-500" />
+          <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 text-center">
+            <div className="mb-8 p-6 bg-indigo-600/5 rounded-3xl border border-indigo-600/10 shadow-sm">
+              <BookText size={60} className="text-indigo-600" />
             </div>
-            <h1 className="text-6xl font-black mb-6 tracking-tight text-white">
+            <h1 className="text-5xl font-black mb-4 tracking-tight text-slate-900">
               Repo<span className="text-indigo-600">Guide</span>
             </h1>
-            <p className="text-slate-400 max-w-xl mb-12 text-xl font-light leading-relaxed">
+            <p className="text-slate-500 max-w-xl mb-10 text-lg font-light leading-relaxed">
               Understand the "how" and "why" behind any codebase. 
               Get mentor-level architectural insights in seconds.
             </p>
             
             <form onSubmit={handleStartAnalysis} className="w-full max-w-2xl relative">
               <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
-                <Github size={24} className="text-slate-600" />
+                <Github size={22} className="text-slate-400" />
               </div>
               <input 
                 type="text"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="Paste a GitHub repository link..."
-                className="w-full bg-slate-900 border border-slate-800 rounded-3xl py-6 pl-16 pr-44 focus:outline-none focus:ring-2 focus:ring-indigo-600/40 transition-all text-slate-100 text-xl shadow-inner"
+                className="w-full bg-white border border-slate-200 rounded-2xl py-5 pl-16 pr-40 focus:outline-none focus:ring-2 focus:ring-indigo-600/20 transition-all text-slate-900 text-lg shadow-sm"
               />
               <button 
                 type="submit"
-                className="absolute right-3 top-3 bottom-3 px-10 bg-indigo-600 hover:bg-indigo-500 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-xl text-white"
+                className="absolute right-2 top-2 bottom-2 px-8 bg-indigo-600 hover:bg-indigo-700 rounded-xl font-bold flex items-center gap-2 transition-all shadow-md text-white"
               >
-                Analyze <Search size={20} />
+                Analyze <Search size={18} />
               </button>
             </form>
 
             {error && (
-              <div className="mt-10 flex items-center gap-3 text-rose-400 bg-rose-400/5 px-8 py-4 rounded-2xl border border-rose-400/10">
-                <AlertCircle size={20} />
-                <span className="font-medium text-lg">{error}</span>
+              <div className="mt-8 flex items-center gap-2 text-rose-600 bg-rose-50 px-6 py-3 rounded-xl border border-rose-100">
+                <AlertCircle size={18} />
+                <span className="font-medium">{error}</span>
               </div>
             )}
           </div>
@@ -112,33 +112,35 @@ const App: React.FC = () => {
       case AppState.FETCHING:
       case AppState.ANALYZING:
         return (
-          <div className="flex flex-col items-center justify-center min-h-[80vh]">
-            <div className="relative mb-12">
-              <div className="absolute inset-0 bg-indigo-600/20 blur-[100px] rounded-full animate-pulse"></div>
-              <Loader2 size={80} className="text-indigo-500 animate-spin relative" />
+          <div className="flex flex-col items-center justify-center min-h-[70vh]">
+            <div className="relative mb-8">
+              <Loader2 size={64} className="text-indigo-600 animate-spin" />
             </div>
-            <h2 className="text-3xl font-bold mb-3 text-white">
+            <h2 className="text-2xl font-bold mb-2 text-slate-900">
               {state === AppState.FETCHING ? "Exploring the repository..." : "Drafting your technical guide..."}
             </h2>
-            <p className="text-slate-500 font-mono text-sm uppercase tracking-[0.3em]">Building context for {url.split('/').pop()}</p>
+            <p className="text-slate-400 font-mono text-xs uppercase tracking-[0.2em]">Building context for {url.split('/').pop()}</p>
           </div>
         );
 
       case AppState.READY:
         return (
-          <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
-            <div className="max-w-4xl mx-auto mb-10">
+          <div className="animate-in fade-in duration-500">
+            <div className="max-w-7xl mx-auto mb-4 flex items-center justify-between">
               <button 
                 onClick={() => { setState(AppState.IDLE); setUrl(''); setAnalysis(null); setChatHistory([]); }}
-                className="flex items-center gap-2 text-slate-500 hover:text-slate-300 transition-colors mb-8 group"
+                className="flex items-center gap-2 text-slate-400 hover:text-indigo-600 transition-colors group"
               >
-                <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-                <span className="text-sm font-bold uppercase tracking-widest">Start New Analysis</span>
+                <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                <span className="text-xs font-bold uppercase tracking-widest">Back</span>
               </button>
+              <div className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest px-3 py-1 bg-slate-100 rounded-full border border-slate-200">
+                {url.split('/').slice(-2).join(' / ')}
+              </div>
             </div>
             
             {analysis && (
-              <>
+              <div className="flex flex-col gap-6">
                 <AnalysisDashboard analysis={analysis} />
                 <ChatBox 
                   messages={chatHistory} 
@@ -146,7 +148,7 @@ const App: React.FC = () => {
                   isLoading={false}
                   suggestedQuestions={analysis.suggestedQuestions}
                 />
-              </>
+              </div>
             )}
           </div>
         );
@@ -154,32 +156,25 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#05070a]">
-      <header className="border-b border-white/5 bg-[#05070a]/80 backdrop-blur-3xl sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3 group">
-            <div className="bg-indigo-600 p-2 rounded-xl group-hover:rotate-12 transition-transform shadow-lg shadow-indigo-600/20">
-              <BookText className="text-white" size={20} />
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <header className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 group cursor-pointer" onClick={() => { setState(AppState.IDLE); setUrl(''); }}>
+            <div className="bg-indigo-600 p-1.5 rounded-lg group-hover:scale-110 transition-transform shadow-sm">
+              <BookText className="text-white" size={18} />
             </div>
-            <span className="font-black text-2xl tracking-tighter text-white">RepoGuide</span>
+            <span className="font-extrabold text-xl tracking-tighter text-slate-900 uppercase">RepoGuide</span>
           </div>
-          {state === AppState.READY && (
-            <div className="hidden md:block">
-              <div className="text-[11px] font-mono font-bold text-slate-500 uppercase tracking-[0.2em] px-4 py-1.5 bg-slate-900/50 rounded-full border border-white/5">
-                {url.split('/').slice(-2).join(' / ')}
-              </div>
-            </div>
-          )}
         </div>
       </header>
 
-      <main className="max-w-7xl w-full mx-auto p-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
         {renderContent()}
       </main>
 
-      <footer className="py-20 border-t border-white/5 text-center">
-        <p className="text-[10px] text-slate-600 uppercase tracking-[0.4em] font-black">
-          A Narrative Tool for Modern Engineers
+      <footer className="py-8 border-t border-slate-200 bg-white">
+        <p className="text-[10px] text-slate-400 text-center uppercase tracking-[0.3em] font-bold">
+          Technical Architecture Walkthrough & Logic Mapping
         </p>
       </footer>
     </div>
