@@ -5,7 +5,7 @@ import { geminiService } from './services/gemini';
 import { AppState, RepoAnalysis, ChatMessage, FileContent } from './types';
 import AnalysisDashboard from './components/AnalysisDashboard';
 import ChatBox from './components/ChatBox';
-import { Github, Search, Code2, Sparkles, AlertCircle, Loader2 } from 'lucide-react';
+import { Github, Search, Code2, Sparkles, AlertCircle, Loader2, BookText } from 'lucide-react';
 
 const App: React.FC = () => {
   const [url, setUrl] = useState('');
@@ -14,23 +14,20 @@ const App: React.FC = () => {
   const [repoFiles, setRepoFiles] = useState<FileContent[]>([]);
   const [analysis, setAnalysis] = useState<RepoAnalysis | null>(null);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const handleStartAnalysis = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setError(null);
     const info = parseGitHubUrl(url);
     if (!info) {
-      setError("Please enter a valid GitHub repository URL (e.g., https://github.com/facebook/react)");
+      setError("Please enter a valid GitHub repository URL.");
       return;
     }
 
     try {
       setState(AppState.FETCHING);
       const files = await fetchRepoContents(info);
-      if (files.length === 0) {
-        throw new Error("No readable code files found in the repository.");
-      }
+      if (files.length === 0) throw new Error("No readable code files found.");
       setRepoFiles(files);
 
       setState(AppState.ANALYZING);
@@ -49,7 +46,6 @@ const App: React.FC = () => {
   const handleSendMessage = async (msg: string) => {
     const userMsg: ChatMessage = { role: 'user', content: msg };
     setChatHistory(prev => [...prev, userMsg]);
-    
     const assistantMsg: ChatMessage = { role: 'assistant', content: '' };
     setChatHistory(prev => [...prev, assistantMsg]);
 
@@ -64,16 +60,11 @@ const App: React.FC = () => {
         });
       });
     } catch (err) {
-      console.error(err);
       setChatHistory(prev => [
         ...prev.slice(0, -1),
-        { role: 'assistant', content: "Error: I encountered an issue responding. Please try again." }
+        { role: 'assistant', content: "Error: I encountered an issue responding." }
       ]);
     }
-  };
-
-  const handleSuggestedQuestion = (q: string) => {
-    handleSendMessage(q);
   };
 
   const renderContent = () => {
@@ -82,14 +73,14 @@ const App: React.FC = () => {
       case AppState.ERROR:
         return (
           <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
-            <div className="mb-8 p-4 bg-blue-500/10 rounded-full">
-              <Code2 size={64} className="text-blue-400" />
+            <div className="mb-8 p-4 bg-indigo-500/10 rounded-full">
+              <BookText size={64} className="text-indigo-400" />
             </div>
-            <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-              Deep Dive into Any Codebase
+            <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">
+              Understand the "How" and "Why"
             </h1>
             <p className="text-slate-400 max-w-xl mb-8">
-              Paste a public GitHub URL and let AI scan, analyze, and walk you through the logic, structure, and intent of the code.
+              Paste a GitHub URL to get a mentor-level walkthrough of its architecture, technical decisions, and organization logic.
             </p>
             
             <form onSubmit={handleStartAnalysis} className="w-full max-w-2xl relative">
@@ -101,13 +92,13 @@ const App: React.FC = () => {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://github.com/username/repository"
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl py-4 pl-12 pr-32 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-slate-100"
+                className="w-full bg-slate-800/50 border border-slate-700 rounded-2xl py-4 pl-12 pr-32 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-slate-100"
               />
               <button 
                 type="submit"
-                className="absolute right-2 top-2 bottom-2 px-6 bg-blue-600 hover:bg-blue-500 rounded-lg font-semibold flex items-center gap-2 transition-colors"
+                className="absolute right-2 top-2 bottom-2 px-6 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-semibold flex items-center gap-2 transition-colors"
               >
-                Analyze <Search size={18} />
+                Start Tour <Search size={18} />
               </button>
             </form>
 
@@ -117,20 +108,6 @@ const App: React.FC = () => {
                 <span>{error}</span>
               </div>
             )}
-
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl">
-              {[
-                { icon: <Sparkles size={20} />, title: "Structural Insights", desc: "Understand how the pieces fit together instantly." },
-                { icon: <Github size={20} />, title: "Direct GitHub Sync", desc: "No cloning needed. Scans directly from the source." },
-                { icon: <Code2 size={20} />, title: "Ask Anything", desc: "From 'how is auth handled?' to 'is this performant?'" }
-              ].map((item, idx) => (
-                <div key={idx} className="bg-slate-800/40 p-6 rounded-xl border border-slate-700/50 text-left">
-                  <div className="text-blue-400 mb-3">{item.icon}</div>
-                  <h3 className="font-semibold mb-2">{item.title}</h3>
-                  <p className="text-sm text-slate-400">{item.desc}</p>
-                </div>
-              ))}
-            </div>
           </div>
         );
 
@@ -138,35 +115,26 @@ const App: React.FC = () => {
       case AppState.ANALYZING:
         return (
           <div className="flex flex-col items-center justify-center min-h-[60vh]">
-            <div className="relative">
-              <div className="absolute inset-0 animate-ping bg-blue-500/20 rounded-full"></div>
-              <div className="relative bg-slate-800 p-8 rounded-full border border-blue-500/50">
-                <Loader2 size={48} className="text-blue-400 animate-spin" />
-              </div>
-            </div>
-            <h2 className="text-2xl font-bold mt-8 mb-2">
-              {state === AppState.FETCHING ? "Fetching Repository Data..." : "Deep-Scanning the Code..."}
+            <Loader2 size={48} className="text-indigo-400 animate-spin mb-6" />
+            <h2 className="text-2xl font-bold mb-2">
+              {state === AppState.FETCHING ? "Reading the repository..." : "Analyzing decisions & patterns..."}
             </h2>
-            <p className="text-slate-400 animate-pulse">
-              {state === AppState.FETCHING 
-                ? "Indexing files and metadata from GitHub." 
-                : "Gemini is reading the codebase to build context."}
-            </p>
+            <p className="text-slate-500">Building a mentor-level guide for you.</p>
           </div>
         );
 
       case AppState.READY:
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-160px)]">
-            <div className="lg:col-span-7 h-full overflow-y-auto pr-2 custom-scrollbar">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-[calc(100vh-160px)]">
+            <div className="lg:col-span-6 h-full overflow-y-auto pr-4 custom-scrollbar">
               {analysis && (
                 <AnalysisDashboard 
                   analysis={analysis} 
-                  onAskQuestion={handleSuggestedQuestion}
+                  onAskQuestion={handleSendMessage}
                 />
               )}
             </div>
-            <div className="lg:col-span-5 h-full">
+            <div className="lg:col-span-6 h-full">
               <ChatBox 
                 messages={chatHistory} 
                 onSendMessage={handleSendMessage} 
@@ -179,33 +147,30 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+    <div className="min-h-screen flex flex-col bg-slate-950">
+      <header className="border-b border-slate-800/50 bg-slate-950/50 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div 
-            className="flex items-center gap-3 cursor-pointer"
+            className="flex items-center gap-2 cursor-pointer"
             onClick={() => { setState(AppState.IDLE); setUrl(''); setAnalysis(null); setChatHistory([]); }}
           >
-            <div className="bg-blue-600 p-2 rounded-lg">
-              <Code2 className="text-white" size={24} />
-            </div>
-            <span className="font-bold text-xl tracking-tight">CodeNexus</span>
+            <BookText className="text-indigo-500" size={24} />
+            <span className="font-bold text-lg tracking-tight">CodeNexus</span>
           </div>
           {state === AppState.READY && (
-            <div className="hidden md:flex items-center gap-4 text-sm bg-slate-800 px-4 py-1.5 rounded-full border border-slate-700">
-              <Github size={16} className="text-slate-400" />
-              <span className="text-slate-300 font-mono truncate max-w-[300px]">{url}</span>
+            <div className="text-xs font-mono text-slate-500 bg-slate-900 px-3 py-1 rounded-full border border-slate-800">
+              {url.split('/').slice(-2).join('/')}
             </div>
           )}
         </div>
       </header>
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-6 overflow-hidden">
         {renderContent()}
       </main>
 
-      <footer className="py-6 border-t border-slate-800 text-center text-slate-500 text-sm">
-        CodeNexus • Powered by Gemini 3 Pro & GitHub API • Created for Vibe Coders
+      <footer className="py-4 border-t border-slate-900 text-center text-[10px] text-slate-600 uppercase tracking-widest font-bold">
+        A deep dive tool for curious developers
       </footer>
     </div>
   );

@@ -1,88 +1,76 @@
 
 import React from 'react';
 import { RepoAnalysis } from '../types';
-import { BookOpen, Box, Cpu, Lightbulb, CheckCircle2, Terminal } from 'lucide-react';
+import { Flag, Map, Lightbulb, FolderTree, Layers, MessageSquareText } from 'lucide-react';
 
 interface AnalysisDashboardProps {
   analysis: RepoAnalysis;
   onAskQuestion: (q: string) => void;
 }
 
+const Section: React.FC<{ icon: React.ReactNode; title: string; children: React.ReactNode; color: string }> = ({ icon, title, children, color }) => (
+  <section className="relative pl-8 pb-10 border-l border-slate-700/50 last:pb-0">
+    <div className={`absolute -left-3 top-0 w-6 h-6 rounded-full ${color} flex items-center justify-center border-4 border-slate-900 shadow-xl`}>
+      {icon}
+    </div>
+    <div className="bg-slate-800/20 border border-slate-700/30 rounded-2xl p-6 transition-all hover:bg-slate-800/30">
+      <h2 className="text-lg font-bold text-slate-100 mb-3 flex items-center gap-2 uppercase tracking-wider text-sm opacity-80">
+        {title}
+      </h2>
+      <div className="text-slate-300 leading-relaxed text-base space-y-4">
+        {children}
+      </div>
+    </div>
+  </section>
+);
+
 const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ analysis, onAskQuestion }) => {
   return (
-    <div className="space-y-6">
-      {/* Summary Card */}
-      <section className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6">
-        <div className="flex items-center gap-3 mb-4 text-blue-400">
-          <BookOpen size={20} />
-          <h2 className="text-lg font-semibold text-slate-100">Project Overview</h2>
+    <div className="max-w-3xl mx-auto py-4 space-y-2">
+      <Section icon={<Flag size={12} className="text-white"/>} title="The Mission" color="bg-blue-600">
+        <p>{analysis.mission}</p>
+      </Section>
+
+      <Section icon={<Layers size={12} className="text-white"/>} title="The Blueprint" color="bg-indigo-600">
+        <p>{analysis.architectureSimple}</p>
+        <div className="pt-2 flex flex-wrap gap-2">
+          {analysis.techStack.map((tech, i) => (
+            <span key={i} className="text-[10px] font-bold px-2 py-0.5 bg-slate-700 rounded uppercase tracking-tighter opacity-70">
+              {tech}
+            </span>
+          ))}
         </div>
-        <p className="text-slate-300 leading-relaxed">
-          {analysis.summary}
-        </p>
-      </section>
+      </Section>
 
-      {/* Architecture & Tech Stack */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <section className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6">
-          <div className="flex items-center gap-3 mb-4 text-indigo-400">
-            <Cpu size={20} />
-            <h2 className="text-lg font-semibold text-slate-100">Architecture</h2>
-          </div>
-          <p className="text-sm text-slate-400 leading-relaxed whitespace-pre-line">
-            {analysis.architecture}
-          </p>
-        </section>
-
-        <section className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6">
-          <div className="flex items-center gap-3 mb-4 text-emerald-400">
-            <Box size={20} />
-            <h2 className="text-lg font-semibold text-slate-100">Tech Stack</h2>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {analysis.techStack.map((tech, i) => (
-              <span key={i} className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold rounded-full">
-                {tech}
-              </span>
-            ))}
-          </div>
-        </section>
-      </div>
-
-      {/* Key Features */}
-      <section className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6">
-        <div className="flex items-center gap-3 mb-4 text-amber-400">
-          <Lightbulb size={20} />
-          <h2 className="text-lg font-semibold text-slate-100">Key Features</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {analysis.keyFeatures.map((feature, i) => (
-            <div key={i} className="flex items-start gap-3 p-3 bg-slate-900/50 rounded-xl border border-slate-700/30">
-              <CheckCircle2 size={16} className="text-amber-500 mt-0.5 shrink-0" />
-              <span className="text-sm text-slate-300">{feature}</span>
+      <Section icon={<Lightbulb size={12} className="text-white"/>} title="Technical Decisions" color="bg-amber-600">
+        <div className="space-y-4">
+          {analysis.technicalDecisions.map((item, i) => (
+            <div key={i} className="border-l-2 border-amber-600/30 pl-4 py-1">
+              <h3 className="font-bold text-amber-400 text-sm mb-1">{item.decision}</h3>
+              <p className="text-sm text-slate-400">{item.rationale}</p>
             </div>
           ))}
         </div>
-      </section>
+      </Section>
 
-      {/* Suggested Questions */}
-      <section>
-        <div className="flex items-center gap-3 mb-4 text-purple-400">
-          <Terminal size={20} />
-          <h2 className="text-lg font-semibold text-slate-100">Suggested Curiosity Points</h2>
-        </div>
-        <div className="space-y-2">
+      <Section icon={<FolderTree size={12} className="text-white"/>} title="The Anatomy" color="bg-emerald-600">
+        <p className="whitespace-pre-line text-sm">{analysis.fileOrganization}</p>
+      </Section>
+
+      <Section icon={<MessageSquareText size={12} className="text-white"/>} title="Deeper Dives" color="bg-purple-600">
+        <p className="text-xs text-slate-500 mb-4 italic">Choose a path to explore the code further:</p>
+        <div className="flex flex-col gap-2">
           {analysis.suggestedQuestions.map((q, i) => (
             <button
               key={i}
               onClick={() => onAskQuestion(q)}
-              className="w-full text-left p-4 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/50 rounded-xl text-sm text-slate-300 transition-all hover:translate-x-1"
+              className="text-left p-3 bg-slate-700/20 hover:bg-purple-600/20 border border-slate-700/50 rounded-xl text-sm text-slate-300 transition-all hover:translate-x-1"
             >
               {q}
             </button>
           ))}
         </div>
-      </section>
+      </Section>
     </div>
   );
 };

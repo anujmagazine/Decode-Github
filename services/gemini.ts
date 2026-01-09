@@ -2,7 +2,6 @@
 import { GoogleGenAI, Type, Chat, GenerateContentResponse } from "@google/genai";
 import { FileContent, RepoAnalysis, ChatMessage } from '../types';
 
-// We use gemini-3-pro-preview because reasoning over a full codebase is a complex task
 const MODEL_NAME = 'gemini-3-pro-preview';
 
 export class GeminiService {
@@ -19,13 +18,17 @@ export class GeminiService {
 
   async analyzeRepo(files: FileContent[]): Promise<RepoAnalysis> {
     const context = this.constructCodeContext(files);
-    const prompt = `You are a world-class software architect. I am providing you with the contents of a GitHub repository. 
-    Analyze the following files and provide a detailed report including:
-    1. A summary of what this project is and what it does.
-    2. An overview of the architecture and project structure.
-    3. The main tech stack used.
-    4. Key features found in the code.
-    5. 5-7 suggested curious questions a developer might ask to understand the project better.
+    const prompt = `You are a technical mentor for "vibe coders" who want to understand code deeply but simply. 
+    Analyze this repository and explain it as if you are talking to a curious developer. 
+    Avoid heavy jargon where possible, or explain it if used.
+    
+    Structure your response into:
+    1. The Mission: What is this project's core purpose?
+    2. The Blueprint: How is it built at a high level? (Simple English)
+    3. Technical Decisions: Identify 3-5 key choices (libs, patterns) and explain WHY they were likely chosen.
+    4. The Anatomy: Explain the folder/file organization logic. Why is it structured this way?
+    5. The Tech Stack: List the main tools used.
+    6. Curiosity Points: 5 questions to help them dive deeper into the code.
 
     Repository Context:
     ${context}`;
@@ -38,13 +41,24 @@ export class GeminiService {
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            summary: { type: Type.STRING },
-            architecture: { type: Type.STRING },
+            mission: { type: Type.STRING },
+            architectureSimple: { type: Type.STRING },
+            technicalDecisions: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  decision: { type: Type.STRING },
+                  rationale: { type: Type.STRING }
+                },
+                required: ["decision", "rationale"]
+              }
+            },
+            fileOrganization: { type: Type.STRING },
             techStack: { type: Type.ARRAY, items: { type: Type.STRING } },
-            keyFeatures: { type: Type.ARRAY, items: { type: Type.STRING } },
             suggestedQuestions: { type: Type.ARRAY, items: { type: Type.STRING } }
           },
-          required: ["summary", "architecture", "techStack", "keyFeatures", "suggestedQuestions"]
+          required: ["mission", "architectureSimple", "technicalDecisions", "fileOrganization", "techStack", "suggestedQuestions"]
         }
       }
     });
@@ -57,25 +71,18 @@ export class GeminiService {
     this.chatInstance = this.ai.chats.create({
       model: MODEL_NAME,
       config: {
-        systemInstruction: `You are an expert guide for this specific codebase. 
-        The user wants to "deep dive" into it to understand how things work.
-        You have full access to the file contents provided. 
-        Be technical, specific, and reference file paths when explaining.
-        Keep your tone helpful, curious, and professional.
+        systemInstruction: `You are an expert mentor for this codebase. 
+        Your goal is to help a "vibe coder" understand the "how" and "why" of this specific repo.
+        Always refer to specific files and folder structures in your explanations.
+        Use simple, clear language but don't shy away from explaining the underlying engineering principles.
         
-        CODEBASE ANALYSIS:
+        CONTEXT FOR ANALYSIS:
         ${JSON.stringify(initialAnalysis, null, 2)}
         
-        CODEBASE CONTENT:
+        FULL CODE CONTEXT:
         ${context}`,
       }
     });
-  }
-
-  async sendMessage(message: string): Promise<string> {
-    if (!this.chatInstance) throw new Error("Chat not initialized");
-    const result = await this.chatInstance.sendMessage({ message });
-    return result.text || "I couldn't process that.";
   }
 
   async sendMessageStream(message: string, onChunk: (chunk: string) => void) {

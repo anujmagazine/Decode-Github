@@ -12,10 +12,14 @@ export interface FileContent {
 }
 
 export interface RepoAnalysis {
-  summary: string;
-  architecture: string;
+  mission: string;
+  architectureSimple: string;
+  technicalDecisions: {
+    decision: string;
+    rationale: string;
+  }[];
+  fileOrganization: string;
   techStack: string[];
-  keyFeatures: string[];
   suggestedQuestions: string[];
 }
 
