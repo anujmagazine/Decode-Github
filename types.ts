@@ -16,13 +16,25 @@ export interface ImportantFile {
   role: string;
 }
 
+export interface TechnicalComponent {
+  name: string;
+  explanation: string;
+}
+
+export interface TechnicalDecision {
+  title: string;
+  rationale: string;
+}
+
 export interface RepoAnalysis {
+  appName: string;
   mission: string;
-  architectureSimple: string;
-  technicalDecisions: {
-    decision: string;
-    rationale: string;
-  }[];
+  coreLogic: {
+    overview: string;
+    components: TechnicalComponent[];
+  };
+  technicalArchitecture: string;
+  topTechnicalDecisions: TechnicalDecision[];
   importantFiles: ImportantFile[];
   fileOrganizationLogic: string;
   techStack: string[];

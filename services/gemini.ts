@@ -18,17 +18,19 @@ export class GeminiService {
 
   async analyzeRepo(files: FileContent[]): Promise<RepoAnalysis> {
     const context = this.constructCodeContext(files);
-    const prompt = `You are a technical mentor for developers who want to understand code deeply but simply. 
-    Analyze this repository and explain it as a narrative guide.
+    const prompt = `You are a world-class technical mentor. Analyze this repository and produce a narrative guide. 
+    Explain the codebase in simple, "easy language" for a junior developer, but retain and use the correct technical jargon (names of patterns, tools, architectural styles).
     
-    Structure your response into:
-    1. The Mission: The project's "why" and core purpose.
-    2. The Blueprint: High-level system design in plain English.
-    3. Technical Decisions: 3-5 key choices (patterns/libs) and their rationale.
-    4. The File Map: Identify 6-8 most important files/folders and explain exactly what role each plays in the system.
-    5. The Anatomy Logic: Why is the folder structure organized this way? (e.g., modular vs layered).
-    6. The Tech Stack: Main tools used.
-    7. Curiosity Points: 5 questions to help them dive deeper.
+    Structure your response into these exact sections:
+    1. App Name: A catchy or descriptive name for this project based on its code.
+    2. The Mission: The core purpose and "why" behind the project.
+    3. App's Core Logic: Break the app down into "Technical Components". For each component, give it its professional name (e.g., "State Orchestrator", "Persistent Storage Layer", "Middleware pipeline") but explain exactly what it does in very simple terms.
+    4. Technical Architecture: Explain how the whole system fits together (e.g., Client-Server, MVC, Layered Architecture) and how data flows through it.
+    5. Top 3 Technical Decisions: Identify exactly 3 major technical choices and explain the rationale for each.
+    6. The File Map: List 6-8 specific files and explain their individual roles.
+    7. The Anatomy Logic: Why is the folder structure organized the way it is?
+    8. Tech Stack: Main libraries and tools.
+    9. Curiosity Points: 5 questions to help the user dive deeper.
 
     Repository Context:
     ${context}`;
@@ -41,17 +43,36 @@ export class GeminiService {
         responseSchema: {
           type: Type.OBJECT,
           properties: {
+            appName: { type: Type.STRING },
             mission: { type: Type.STRING },
-            architectureSimple: { type: Type.STRING },
-            technicalDecisions: {
+            coreLogic: {
+              type: Type.OBJECT,
+              properties: {
+                overview: { type: Type.STRING },
+                components: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      name: { type: Type.STRING },
+                      explanation: { type: Type.STRING }
+                    },
+                    required: ["name", "explanation"]
+                  }
+                }
+              },
+              required: ["overview", "components"]
+            },
+            technicalArchitecture: { type: Type.STRING },
+            topTechnicalDecisions: {
               type: Type.ARRAY,
               items: {
                 type: Type.OBJECT,
                 properties: {
-                  decision: { type: Type.STRING },
+                  title: { type: Type.STRING },
                   rationale: { type: Type.STRING }
                 },
-                required: ["decision", "rationale"]
+                required: ["title", "rationale"]
               }
             },
             importantFiles: {
@@ -69,7 +90,7 @@ export class GeminiService {
             techStack: { type: Type.ARRAY, items: { type: Type.STRING } },
             suggestedQuestions: { type: Type.ARRAY, items: { type: Type.STRING } }
           },
-          required: ["mission", "architectureSimple", "technicalDecisions", "importantFiles", "fileOrganizationLogic", "techStack", "suggestedQuestions"]
+          required: ["appName", "mission", "coreLogic", "technicalArchitecture", "topTechnicalDecisions", "importantFiles", "fileOrganizationLogic", "techStack", "suggestedQuestions"]
         }
       }
     });
@@ -82,12 +103,11 @@ export class GeminiService {
     this.chatInstance = this.ai.chats.create({
       model: MODEL_NAME,
       config: {
-        systemInstruction: `You are a mentor helping a developer understand this codebase. 
-        Refer to specific files like ${initialAnalysis.importantFiles.map(f => f.path).join(', ')} when explaining.
-        Focus on the "why" behind the code, not just the "what".
-        
-        ANALYSIS: ${JSON.stringify(initialAnalysis)}
-        CODE: ${context}`,
+        systemInstruction: `You are the primary mentor for the project "${initialAnalysis.appName}". 
+        The user has just read your architectural guide and wants to dive into specifics.
+        Reference the components you identified (like ${initialAnalysis.coreLogic.components.map(c => c.name).join(', ')}) when answering.
+        Always refer to specific files and technical decisions from the analysis.
+        Be encouraging, technical, and clear.`,
       }
     });
   }

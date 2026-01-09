@@ -5,7 +5,7 @@ import { geminiService } from './services/gemini';
 import { AppState, RepoAnalysis, ChatMessage, FileContent } from './types';
 import AnalysisDashboard from './components/AnalysisDashboard';
 import ChatBox from './components/ChatBox';
-import { Github, Search, AlertCircle, Loader2, BookText } from 'lucide-react';
+import { Github, Search, AlertCircle, Loader2, BookText, ArrowLeft } from 'lucide-react';
 
 const App: React.FC = () => {
   const [url, setUrl] = useState('');
@@ -69,40 +69,41 @@ const App: React.FC = () => {
       case AppState.IDLE:
       case AppState.ERROR:
         return (
-          <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
-            <div className="mb-8 p-5 bg-indigo-500/10 rounded-2xl border border-indigo-500/20">
-              <BookText size={48} className="text-indigo-400" />
+          <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 text-center">
+            <div className="mb-12 p-8 bg-indigo-600/5 rounded-[2.5rem] border border-indigo-600/10 shadow-2xl">
+              <BookText size={80} className="text-indigo-500" />
             </div>
-            <h1 className="text-5xl font-black mb-4 tracking-tight text-white">
-              Repo<span className="text-indigo-500">Guide</span>
+            <h1 className="text-6xl font-black mb-6 tracking-tight text-white">
+              Repo<span className="text-indigo-600">Guide</span>
             </h1>
-            <p className="text-slate-400 max-w-xl mb-12 text-lg">
-              Unlock the engineering secrets of any public codebase. From high-level architecture to the specific "why" behind every file.
+            <p className="text-slate-400 max-w-xl mb-12 text-xl font-light leading-relaxed">
+              Understand the "how" and "why" behind any codebase. 
+              Get mentor-level architectural insights in seconds.
             </p>
             
             <form onSubmit={handleStartAnalysis} className="w-full max-w-2xl relative">
-              <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                <Github size={20} className="text-slate-500" />
+              <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+                <Github size={24} className="text-slate-600" />
               </div>
               <input 
                 type="text"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                placeholder="Paste GitHub repository URL..."
-                className="w-full bg-slate-900 border border-slate-800 rounded-2xl py-5 pl-14 pr-40 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all text-slate-100 text-lg shadow-2xl"
+                placeholder="Paste a GitHub repository link..."
+                className="w-full bg-slate-900 border border-slate-800 rounded-3xl py-6 pl-16 pr-44 focus:outline-none focus:ring-2 focus:ring-indigo-600/40 transition-all text-slate-100 text-xl shadow-inner"
               />
               <button 
                 type="submit"
-                className="absolute right-2.5 top-2.5 bottom-2.5 px-8 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg text-sm"
+                className="absolute right-3 top-3 bottom-3 px-10 bg-indigo-600 hover:bg-indigo-500 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-xl text-white"
               >
-                Analyze <Search size={18} />
+                Analyze <Search size={20} />
               </button>
             </form>
 
             {error && (
-              <div className="mt-8 flex items-center gap-3 text-rose-400 bg-rose-400/5 px-6 py-3 rounded-xl border border-rose-400/20">
-                <AlertCircle size={18} />
-                <span className="font-medium">{error}</span>
+              <div className="mt-10 flex items-center gap-3 text-rose-400 bg-rose-400/5 px-8 py-4 rounded-2xl border border-rose-400/10">
+                <AlertCircle size={20} />
+                <span className="font-medium text-lg">{error}</span>
               </div>
             )}
           </div>
@@ -111,57 +112,60 @@ const App: React.FC = () => {
       case AppState.FETCHING:
       case AppState.ANALYZING:
         return (
-          <div className="flex flex-col items-center justify-center min-h-[60vh]">
-            <div className="relative mb-10">
-              <div className="absolute inset-0 bg-indigo-500/20 blur-2xl rounded-full animate-pulse"></div>
-              <Loader2 size={64} className="text-indigo-400 animate-spin relative" />
+          <div className="flex flex-col items-center justify-center min-h-[80vh]">
+            <div className="relative mb-12">
+              <div className="absolute inset-0 bg-indigo-600/20 blur-[100px] rounded-full animate-pulse"></div>
+              <Loader2 size={80} className="text-indigo-500 animate-spin relative" />
             </div>
-            <h2 className="text-2xl font-bold mb-2 text-slate-100">
-              {state === AppState.FETCHING ? "Fetching the source..." : "Building the narrative..."}
+            <h2 className="text-3xl font-bold mb-3 text-white">
+              {state === AppState.FETCHING ? "Exploring the repository..." : "Drafting your technical guide..."}
             </h2>
-            <p className="text-slate-500 font-mono text-xs uppercase tracking-widest">Processing {url.split('/').pop()} codebase</p>
+            <p className="text-slate-500 font-mono text-sm uppercase tracking-[0.3em]">Building context for {url.split('/').pop()}</p>
           </div>
         );
 
       case AppState.READY:
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 h-[calc(100vh-140px)]">
-            <div className="lg:col-span-8 h-full overflow-y-auto pr-6 custom-scrollbar scroll-smooth">
-              {analysis && (
-                <AnalysisDashboard 
-                  analysis={analysis} 
-                  onAskQuestion={handleSendMessage}
+          <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
+            <div className="max-w-4xl mx-auto mb-10">
+              <button 
+                onClick={() => { setState(AppState.IDLE); setUrl(''); setAnalysis(null); setChatHistory([]); }}
+                className="flex items-center gap-2 text-slate-500 hover:text-slate-300 transition-colors mb-8 group"
+              >
+                <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+                <span className="text-sm font-bold uppercase tracking-widest">Start New Analysis</span>
+              </button>
+            </div>
+            
+            {analysis && (
+              <>
+                <AnalysisDashboard analysis={analysis} />
+                <ChatBox 
+                  messages={chatHistory} 
+                  onSendMessage={handleSendMessage} 
+                  isLoading={false}
+                  suggestedQuestions={analysis.suggestedQuestions}
                 />
-              )}
-            </div>
-            <div className="lg:col-span-4 h-full relative">
-              <ChatBox 
-                messages={chatHistory} 
-                onSendMessage={handleSendMessage} 
-                isLoading={false}
-              />
-            </div>
+              </>
+            )}
           </div>
         );
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0a0c10]">
-      <header className="border-b border-slate-900/80 bg-[#0a0c10]/80 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between">
-          <div 
-            className="flex items-center gap-2.5 cursor-pointer group"
-            onClick={() => { setState(AppState.IDLE); setUrl(''); setAnalysis(null); setChatHistory([]); }}
-          >
-            <div className="bg-indigo-600 p-1.5 rounded-lg group-hover:scale-110 transition-transform">
-              <BookText className="text-white" size={18} />
+    <div className="min-h-screen bg-[#05070a]">
+      <header className="border-b border-white/5 bg-[#05070a]/80 backdrop-blur-3xl sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3 group">
+            <div className="bg-indigo-600 p-2 rounded-xl group-hover:rotate-12 transition-transform shadow-lg shadow-indigo-600/20">
+              <BookText className="text-white" size={20} />
             </div>
-            <span className="font-bold text-lg tracking-tight text-slate-100">RepoGuide</span>
+            <span className="font-black text-2xl tracking-tighter text-white">RepoGuide</span>
           </div>
           {state === AppState.READY && (
-            <div className="flex items-center gap-3">
-              <div className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest px-3 py-1 bg-slate-900 rounded-full border border-slate-800">
+            <div className="hidden md:block">
+              <div className="text-[11px] font-mono font-bold text-slate-500 uppercase tracking-[0.2em] px-4 py-1.5 bg-slate-900/50 rounded-full border border-white/5">
                 {url.split('/').slice(-2).join(' / ')}
               </div>
             </div>
@@ -169,9 +173,15 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-8 overflow-hidden">
+      <main className="max-w-7xl w-full mx-auto p-8">
         {renderContent()}
       </main>
+
+      <footer className="py-20 border-t border-white/5 text-center">
+        <p className="text-[10px] text-slate-600 uppercase tracking-[0.4em] font-black">
+          A Narrative Tool for Modern Engineers
+        </p>
+      </footer>
     </div>
   );
 };
