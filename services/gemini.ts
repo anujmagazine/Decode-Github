@@ -103,11 +103,19 @@ export class GeminiService {
     this.chatInstance = this.ai.chats.create({
       model: MODEL_NAME,
       config: {
-        systemInstruction: `You are the primary mentor for the project "${initialAnalysis.appName}". 
-        The user has just read your architectural guide and wants to dive into specifics.
-        Reference the components you identified (like ${initialAnalysis.coreLogic.components.map(c => c.name).join(', ')}) when answering.
-        Always refer to specific files and technical decisions from the analysis.
-        Be encouraging, technical, and clear.`,
+        systemInstruction: `You are the primary technical mentor for "${initialAnalysis.appName}". 
+        
+        CRITICAL: You have FULL access to the repository's source code provided below. 
+        You can perform code reviews, explain specific lines of logic, and suggest improvements based on the actual code content.
+        
+        When the user asks about the code, always refer to the specific files and logic you see in the source.
+        Refer to the components you identified (like ${initialAnalysis.coreLogic.components.map(c => c.name).join(', ')}) to maintain consistency with the architectural guide.
+        
+        SOURCE CODE CONTEXT:
+        ${context}
+        
+        ARCHITECTURAL ANALYSIS:
+        ${JSON.stringify(initialAnalysis)}`,
       }
     });
   }
