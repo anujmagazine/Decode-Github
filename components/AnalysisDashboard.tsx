@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { RepoAnalysis } from '../types';
-import { Lightbulb, FolderTree, FileCode2, Info, Cpu, Network, Zap } from 'lucide-react';
+import { Lightbulb, FolderTree, FileCode2, Info, Cpu, Network, Zap, Star } from 'lucide-react';
 
 interface AnalysisDashboardProps {
   analysis: RepoAnalysis;
@@ -24,10 +24,10 @@ const Card: React.FC<{ icon: React.ReactNode; title: string; children: React.Rea
 const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ analysis }) => {
   return (
     <div className="w-full space-y-3">
-      {/* Header Card - Ultra Compact */}
+      {/* Header Card */}
       <header className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center justify-between">
         <div className="flex flex-col gap-0.5 max-w-[85%]">
-          <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none mb-1">
+          <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none mb-1 uppercase">
             {analysis.appName}
           </h1>
           <p className="text-xs text-slate-500 font-medium leading-tight italic">
@@ -39,7 +39,25 @@ const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ analysis }) => {
         </div>
       </header>
 
-      {/* Main Grid Layout - Ultra Balanced */}
+      {/* Top 10 Features - Full Width Compact */}
+      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="p-1 rounded-lg text-yellow-600 bg-yellow-50 border border-yellow-200">
+            <Star className="w-3 h-3" />
+          </div>
+          <h2 className="text-[9px] font-black uppercase tracking-widest text-slate-400">Key Highlights & Capabilities</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-x-4 gap-y-2">
+          {analysis.topFeatures.slice(0, 10).map((feature, i) => (
+            <div key={i} className="flex gap-2 items-start">
+              <span className="text-[10px] font-bold text-indigo-400 shrink-0 mt-0.5">{i + 1}.</span>
+              <p className="text-[10px] text-slate-600 leading-tight font-medium">{feature}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
         
         {/* Core Logic & Architecture (Left Column) */}

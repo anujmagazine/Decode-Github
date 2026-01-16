@@ -24,13 +24,14 @@ export class GeminiService {
     Structure your response into these exact sections:
     1. App Name: A catchy or descriptive name for this project based on its code.
     2. The Mission: The core purpose and "why" behind the project.
-    3. App's Core Logic: Break the app down into "Technical Components". For each component, give it its professional name (e.g., "State Orchestrator", "Persistent Storage Layer", "Middleware pipeline") but explain exactly what it does in very simple terms.
-    4. Technical Architecture: Explain how the whole system fits together (e.g., Client-Server, MVC, Layered Architecture) and how data flows through it.
-    5. Top 3 Technical Decisions: Identify exactly 3 major technical choices and explain the rationale for each.
-    6. The File Map: List 6-8 specific files and explain their individual roles.
-    7. The Anatomy Logic: Why is the folder structure organized the way it is?
-    8. Tech Stack: Main libraries and tools.
-    9. Curiosity Points: 5 questions to help the user dive deeper.
+    3. Top 10 Features: List exactly 10 key features or capabilities of this app. Use warm, human-like language that focuses on what the app actually *does* for a user or developer (e.g., "Keeps track of your settings even after you refresh the page" instead of "Persistent local storage").
+    4. App's Core Logic: Break the app down into "Technical Components". For each component, give it its professional name but explain exactly what it does in very simple terms.
+    5. Technical Architecture: Explain how the whole system fits together and how data flows through it.
+    6. Top 3 Technical Decisions: Identify exactly 3 major technical choices and explain the rationale for each.
+    7. The File Map: List 6-8 specific files and explain their individual roles.
+    8. The Anatomy Logic: Why is the folder structure organized the way it is?
+    9. Tech Stack: Main libraries and tools.
+    10. Curiosity Points: 5 questions to help the user dive deeper.
 
     Repository Context:
     ${context}`;
@@ -45,6 +46,7 @@ export class GeminiService {
           properties: {
             appName: { type: Type.STRING },
             mission: { type: Type.STRING },
+            topFeatures: { type: Type.ARRAY, items: { type: Type.STRING } },
             coreLogic: {
               type: Type.OBJECT,
               properties: {
@@ -90,7 +92,7 @@ export class GeminiService {
             techStack: { type: Type.ARRAY, items: { type: Type.STRING } },
             suggestedQuestions: { type: Type.ARRAY, items: { type: Type.STRING } }
           },
-          required: ["appName", "mission", "coreLogic", "technicalArchitecture", "topTechnicalDecisions", "importantFiles", "fileOrganizationLogic", "techStack", "suggestedQuestions"]
+          required: ["appName", "mission", "topFeatures", "coreLogic", "technicalArchitecture", "topTechnicalDecisions", "importantFiles", "fileOrganizationLogic", "techStack", "suggestedQuestions"]
         }
       }
     });

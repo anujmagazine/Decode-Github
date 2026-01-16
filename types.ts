@@ -29,6 +29,7 @@ export interface TechnicalDecision {
 export interface RepoAnalysis {
   appName: string;
   mission: string;
+  topFeatures: string[];
   coreLogic: {
     overview: string;
     components: TechnicalComponent[];
