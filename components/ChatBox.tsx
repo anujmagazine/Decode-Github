@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { ChatMessage } from '../types';
-import { Send, User, Bot, Sparkles } from 'lucide-react';
+import { Send, User, Bot, Sparkles, Copy, Check } from 'lucide-react';
 
 interface ChatBoxProps {
   messages: ChatMessage[];
@@ -12,7 +12,14 @@ interface ChatBoxProps {
 
 const ChatBox: React.FC<ChatBoxProps> = ({ messages, onSendMessage, isLoading, suggestedQuestions = [] }) => {
   const [input, setInput] = useState('');
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleCopy = (text: string, index: number) => {
+    navigator.clipboard.writeText(text);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -69,11 +76,20 @@ const ChatBox: React.FC<ChatBoxProps> = ({ messages, onSendMessage, isLoading, s
                 }`}>
                   {msg.role === 'user' ? <User size={12} className="text-white" /> : <Bot size={12} className="text-indigo-600" />}
                 </div>
-                <div className={`p-3 rounded-xl text-[12px] leading-relaxed shadow-xs ${
+                <div className={`p-3 rounded-xl text-[12px] leading-relaxed shadow-xs relative group ${
                   msg.role === 'user' 
                   ? 'bg-indigo-600 text-white rounded-tr-none' 
                   : 'bg-white text-slate-700 border border-slate-200 rounded-tl-none'
                 }`}>
+                  {msg.content !== '' && (
+                    <button
+                      onClick={() => handleCopy(msg.content, i)}
+                      className={`absolute top-1 ${msg.role === 'user' ? '-left-8' : '-right-8'} p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-all hover:bg-slate-100 text-slate-400 hover:text-indigo-600 bg-white border border-slate-100 shadow-sm z-10`}
+                      title="Copy message"
+                    >
+                      {copiedIndex === i ? <Check size={10} className="text-emerald-500" /> : <Copy size={10} />}
+                    </button>
+                  )}
                   {msg.content === '' ? (
                     <div className="flex gap-0.5 py-1">
                       <div className="w-1 h-1 bg-indigo-200 rounded-full animate-pulse"></div>
