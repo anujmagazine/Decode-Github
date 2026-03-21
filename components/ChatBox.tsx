@@ -14,12 +14,20 @@ const ChatBox: React.FC<ChatBoxProps> = ({ messages, onSendMessage, isLoading, s
   const [input, setInput] = useState('');
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleCopy = (text: string, index: number) => {
     navigator.clipboard.writeText(text);
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 2000);
   };
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [input]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -108,18 +116,25 @@ const ChatBox: React.FC<ChatBoxProps> = ({ messages, onSendMessage, isLoading, s
         </div>
 
         <form onSubmit={handleSubmit} className="p-2 bg-white border-t border-slate-100">
-          <div className="relative">
-            <input
-              type="text"
+          <div className="relative flex items-end gap-2">
+            <textarea
+              ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit(e);
+                }
+              }}
               placeholder="Deep dive into code logic..."
-              className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 pl-3 pr-10 focus:outline-none focus:ring-1 focus:ring-indigo-600/20 transition-all text-xs text-slate-700 placeholder:text-slate-400"
+              rows={2}
+              className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-3 pr-10 focus:outline-none focus:ring-1 focus:ring-indigo-600/20 transition-all text-xs text-slate-700 placeholder:text-slate-400 resize-none min-h-[60px] max-h-[160px] custom-scrollbar"
             />
             <button 
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="absolute right-2 top-1 bottom-1 px-1.5 text-indigo-600 hover:text-indigo-800 disabled:text-slate-300 transition-all"
+              className="absolute right-2 bottom-2 p-1.5 text-indigo-600 hover:text-indigo-800 disabled:text-slate-300 transition-all"
             >
               <Send size={14} />
             </button>
