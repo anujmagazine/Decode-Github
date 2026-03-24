@@ -17,7 +17,8 @@ const App: React.FC = () => {
   const handleStartAnalysis = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setError(null);
-    const info = parseGitHubUrl(url);
+    const trimmedUrl = url.trim();
+    const info = parseGitHubUrl(trimmedUrl);
     if (!info) {
       setError("Please enter a valid GitHub repository URL.");
       return;

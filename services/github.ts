@@ -6,7 +6,7 @@ import { RepoInfo, FileContent } from '../types';
  */
 export const parseGitHubUrl = (url: string): RepoInfo | null => {
   try {
-    const cleanUrl = url.replace(/\/$/, '');
+    const cleanUrl = url.trim().replace(/\/$/, '');
     const regex = /github\.com\/([^/]+)\/([^/]+)(?:\/tree\/([^/]+))?/;
     const match = cleanUrl.match(regex);
     if (!match) return null;
@@ -24,18 +24,52 @@ export const parseGitHubUrl = (url: string): RepoInfo | null => {
  * Fetches the directory structure and filters for relevant code files.
  */
 export const fetchRepoContents = async (info: RepoInfo): Promise<FileContent[]> => {
-  const { owner, repo, branch = 'main' } = info;
+  const { owner, repo } = info;
+  let { branch } = info;
+
+  // 1. Get repo info to find the default branch if not specified
+  if (!branch || branch === 'main') {
+    try {
+      const repoRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
+      if (repoRes.ok) {
+        const repoData = await repoRes.json();
+        branch = repoData.default_branch || 'main';
+      } else if (repoRes.status === 404) {
+        throw new Error(`Repository not found: ${owner}/${repo}. Please check for typos (e.g., "Compliant" vs "Complaint") or if the repository is private.`);
+      } else if (repoRes.status === 403) {
+        throw new Error("GitHub API rate limit exceeded. Please try again later.");
+      } else {
+        const errorData = await repoRes.json().catch(() => ({}));
+        throw new Error(`GitHub API error: ${errorData.message || repoRes.statusText || repoRes.status}`);
+      }
+    } catch (e: any) {
+      if (e.message.includes('GitHub API') || e.message.includes('Repository not found')) throw e;
+      // Fallback to 'main' if repo info fetch fails for other reasons
+      branch = branch || 'main';
+    }
+  }
   
-  // 1. Get the recursive tree
+  // 2. Get the recursive tree
   const treeUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
   const response = await fetch(treeUrl);
   
   if (!response.ok) {
-    // If 'main' fails, try 'master'
-    if (branch === 'main') {
+    // If 'main' fails and we haven't tried 'master' yet (and we didn't get branch from API)
+    if (branch === 'main' && !info.branch) {
       return fetchRepoContents({ ...info, branch: 'master' });
     }
-    throw new Error(`GitHub API error: ${response.statusText}`);
+    
+    const errorData = await response.json().catch(() => ({}));
+    const message = errorData.message || response.statusText || response.status;
+    
+    if (response.status === 404) {
+      throw new Error(`Branch "${branch}" not found or repository is private.`);
+    }
+    if (response.status === 403 && message.includes('rate limit')) {
+      throw new Error("GitHub API rate limit exceeded. Please try again later.");
+    }
+    
+    throw new Error(`GitHub API error: ${message}`);
   }
 
   const data = await response.json();
