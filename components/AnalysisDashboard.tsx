@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { RepoAnalysis } from '../types';
-import { Lightbulb, FolderTree, FileCode2, Info, Cpu, Network, Zap, Star, Share2 } from 'lucide-react';
+import { Lightbulb, FolderTree, FileCode2, Info, Cpu, Network, Zap, Star, Share2, FileText } from 'lucide-react';
 import MermaidDiagram from './MermaidDiagram';
+import DocumentationGenerator from './DocumentationGenerator';
 
 interface AnalysisDashboardProps {
   analysis: RepoAnalysis;
@@ -12,7 +13,7 @@ const Card: React.FC<{ icon: React.ReactNode; title: string; children: React.Rea
   <div className={`bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full ${className}`}>
     <div className="flex items-center gap-2 mb-2">
       <div className={`p-1 rounded-lg ${colorClass} bg-opacity-10 text-opacity-100 border border-current bg-transparent`}>
-        {React.cloneElement(icon as React.ReactElement, { className: 'w-3 h-3' })}
+        {React.cloneElement(icon as any, { className: 'w-3 h-3' })}
       </div>
       <h2 className="text-[9px] font-black uppercase tracking-widest text-slate-400">{title}</h2>
     </div>
@@ -72,6 +73,9 @@ const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ analysis }) => {
           </div>
         </div>
       )}
+
+      {/* Documentation Generator */}
+      <DocumentationGenerator analysis={analysis} />
 
       {/* Main Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">

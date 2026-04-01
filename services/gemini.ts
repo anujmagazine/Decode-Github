@@ -7,6 +7,7 @@ const MODEL_NAME = 'gemini-3-pro-preview';
 export class GeminiService {
   private ai: GoogleGenAI;
   private chatInstance: Chat | null = null;
+  private currentFiles: FileContent[] = [];
 
   constructor() {
     this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
@@ -17,6 +18,7 @@ export class GeminiService {
   }
 
   async analyzeRepo(files: FileContent[]): Promise<RepoAnalysis> {
+    this.currentFiles = files;
     const context = this.constructCodeContext(files);
     const prompt = `You are a world-class technical mentor. Analyze this repository and produce a narrative guide. 
     Explain the codebase in simple, "easy language" for a junior developer, but retain and use the correct technical jargon (names of patterns, tools, architectural styles).
@@ -131,6 +133,30 @@ export class GeminiService {
       const c = chunk as GenerateContentResponse;
       onChunk(c.text || "");
     }
+  }
+
+  async generateDoc(type: 'README' | 'CONTRIBUTING', analysis: RepoAnalysis): Promise<string> {
+    const context = this.constructCodeContext(this.currentFiles);
+    const prompt = `You are a world-class technical writer. Based on the following repository analysis and source code, generate a high-quality, professional ${type}.md file.
+    
+    The document should be:
+    - Comprehensive and clear.
+    - Well-formatted with Markdown.
+    - Include relevant sections (e.g., for README: Installation, Usage, Features, Tech Stack; for CONTRIBUTING: Setup, Coding Standards, PR Process).
+    - Use a professional yet welcoming tone.
+    
+    ANALYSIS CONTEXT:
+    ${JSON.stringify(analysis)}
+    
+    SOURCE CODE CONTEXT:
+    ${context}`;
+
+    const response = await this.ai.models.generateContent({
+      model: MODEL_NAME,
+      contents: prompt,
+    });
+
+    return response.text || "";
   }
 }
 
