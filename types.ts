@@ -40,6 +40,7 @@ export interface RepoAnalysis {
   fileOrganizationLogic: string;
   techStack: string[];
   suggestedQuestions: string[];
+  mermaidDiagram?: string;
 }
 
 export interface ChatMessage {

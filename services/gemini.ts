@@ -32,6 +32,7 @@ export class GeminiService {
     8. The Anatomy Logic: Why is the folder structure organized the way it is?
     9. Tech Stack: Main libraries and tools.
     10. Curiosity Points: 5 questions to help the user dive deeper.
+    11. Architecture Diagram: A Mermaid.js flowchart (graph TD) that visualizes the high-level architecture, showing how the main components interact. Use clear, simple labels.
 
     Repository Context:
     ${context}`;
@@ -90,9 +91,10 @@ export class GeminiService {
             },
             fileOrganizationLogic: { type: Type.STRING },
             techStack: { type: Type.ARRAY, items: { type: Type.STRING } },
-            suggestedQuestions: { type: Type.ARRAY, items: { type: Type.STRING } }
+            suggestedQuestions: { type: Type.ARRAY, items: { type: Type.STRING } },
+            mermaidDiagram: { type: Type.STRING, description: "A Mermaid.js flowchart (graph TD) representing the architecture." }
           },
-          required: ["appName", "mission", "topFeatures", "coreLogic", "technicalArchitecture", "topTechnicalDecisions", "importantFiles", "fileOrganizationLogic", "techStack", "suggestedQuestions"]
+          required: ["appName", "mission", "topFeatures", "coreLogic", "technicalArchitecture", "topTechnicalDecisions", "importantFiles", "fileOrganizationLogic", "techStack", "suggestedQuestions", "mermaidDiagram"]
         }
       }
     });

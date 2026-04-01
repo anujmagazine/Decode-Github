@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { RepoAnalysis } from '../types';
-import { Lightbulb, FolderTree, FileCode2, Info, Cpu, Network, Zap, Star } from 'lucide-react';
+import { Lightbulb, FolderTree, FileCode2, Info, Cpu, Network, Zap, Star, Share2 } from 'lucide-react';
+import MermaidDiagram from './MermaidDiagram';
 
 interface AnalysisDashboardProps {
   analysis: RepoAnalysis;
@@ -56,6 +57,21 @@ const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ analysis }) => {
           ))}
         </div>
       </div>
+
+      {/* Visual Architecture Mapping */}
+      {analysis.mermaidDiagram && (
+        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="p-1 rounded-lg text-indigo-600 bg-indigo-50 border border-indigo-200">
+              <Share2 className="w-3 h-3" />
+            </div>
+            <h2 className="text-[9px] font-black uppercase tracking-widest text-slate-400">Visual Architecture Map</h2>
+          </div>
+          <div className="w-full overflow-hidden border border-slate-100 rounded-lg">
+            <MermaidDiagram chart={analysis.mermaidDiagram} />
+          </div>
+        </div>
+      )}
 
       {/* Main Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
